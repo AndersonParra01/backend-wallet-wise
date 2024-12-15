@@ -18,7 +18,24 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@shared/*": ["src/shared/*"]
+      "@shared/*": ["src/shared/*"],
+      "@features/*": ["src/features/*"],
+      "@services/*": ["src/services/*"],
+      "@utils/*": ["src/utils/*"],
+      "@routes/*": ["src/routes/*"],
+      "@components/*": ["src/components/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@types/*": ["src/types/*"],
+      "@assets/*": ["src/assets/*"],
+      "@constants/*": ["src/constants/*"],
+      "@test/*": ["test/*"],
+      "@test-utils/*": ["test-utils/*"],
+      "@mocks/*": ["mocks/*"],
+      "@cypress/*": ["cypress/*"],
+      "@config/*": ["src/config/*"],
+      "@config-shared/*": ["src/config-shared/*"],
+      "@models/*": ["src/models/*"]
+
     }
   }
 }

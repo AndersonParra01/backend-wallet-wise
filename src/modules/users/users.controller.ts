@@ -6,12 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from '@models/user.entity';
 
-@Controller('users')
+@Controller('users/')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -26,7 +28,7 @@ export class UsersController {
   }
 
   @Get('get/:id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOne(id);
   }
 
@@ -38,5 +40,10 @@ export class UsersController {
   @Delete('delete/:id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+
+  @Put('update/:id')
+  updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(+id, updateUserDto);
   }
 }

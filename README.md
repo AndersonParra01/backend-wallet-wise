@@ -201,3 +201,31 @@ src/
 ---
 
 Con esta guía y tu experiencia como programador, tendrás una base sólida para el desarrollo del backend y la aplicación en general.
+
+```
+src/
+├── app.module.ts           # Módulo raíz
+├── main.ts                 # Entrada del servidor
+├── modules/
+│   ├── user/
+│   │   ├── user.controller.ts
+│   │   ├── user.service.ts
+│   │   ├── user.module.ts
+│   │   ├── interfaces/
+│   │   │   └── user.interface.ts
+│   │   └── dto/
+│   │       └── create-user.dto.ts
+│   └── auth/
+│       ├── auth.controller.ts
+│       ├── auth.service.ts
+│       ├── auth.module.ts
+│       ├── interfaces/
+│       │   └── auth.interface.ts
+│       └── dto/
+│           └── login.dto.ts
+└── shared/
+    ├── exceptions/
+    │   └── custom-exception.filter.ts
+    └── pipes/
+        └── validation.pipe.ts
+```
