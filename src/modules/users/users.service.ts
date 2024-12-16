@@ -3,32 +3,28 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Model, Types } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectModel } from '@nestjs/mongoose';
 import { User } from '@models/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('Users') private readonly userModel: Model<User>) {}
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {}
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = new this.userModel(createUserDto);
-    return user.save();
+    return this.userRepository.save(createUserDto);
   }
 
   async findAll(): Promise<User[]> {
-    return await this.userModel.find().exec();
+    return await this.userRepository.find();
   }
 
-  async findOne(id: string): Promise<User> {
-    // Validar el formato del ID
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException(`Invalid ID format: ${id}`);
-    }
-
+  async findOne(id: number): Promise<User> {
     try {
-      const user = await this.userModel.findById(id).exec();
+      const user = await this.userRepository.findOne({ where: { id } });
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found`);
       }
@@ -49,7 +45,7 @@ export class UsersService {
 
   async getUserByEmailAndPassword(email: string, password: string) {
     try {
-      const user = await this.userModel.findOne({ email }).exec();
+      const user = await this.userRepository.findOne({ where: { email } });
       if (!user) {
         throw new NotFoundException('User not found');
       }

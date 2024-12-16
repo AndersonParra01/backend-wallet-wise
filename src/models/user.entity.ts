@@ -1,22 +1,27 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { AuditBase } from '@shared/audiBase';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-@Schema()
-export class User extends Document {
-  @Prop({ required: false })
+@Entity('users')
+export class User extends AuditBase {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   name: string;
 
-  @Prop({ required: false })
+  @Column()
   lastname: string;
 
-  @Prop({ required: true, unique: true })
+  @Column({ unique: true })
   email: string;
 
-  @Prop({ default: Date.now() })
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Prop({ default: null })
   updateAt: Date;
 }
-
-export const UserSchema = SchemaFactory.createForClass(User);
