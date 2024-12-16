@@ -29,6 +29,10 @@ export class AuthService {
     return `This action removes a #${id} auth`;
   }
 
+  async validateUser(email: string, password: string) {
+    /* const user  */
+  }
+
   login(email: string, password: string) {
     if (email && password) {
       this.userService.findOne('asasas');
