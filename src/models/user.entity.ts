@@ -1,13 +1,13 @@
-import { AuditBase } from '@shared/audiBase';
 import {
   Column,
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('users')
-export class User extends AuditBase {
+export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,5 +23,10 @@ export class User extends AuditBase {
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
   updateAt: Date;
 }

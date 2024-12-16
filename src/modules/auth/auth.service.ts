@@ -35,7 +35,6 @@ export class AuthService {
 
   login(email: string, password: string) {
     if (email && password) {
-      this.userService.findOne('asasas');
     }
   }
 }
