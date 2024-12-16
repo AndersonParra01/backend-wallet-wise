@@ -17,6 +17,9 @@ export class User {
   @Column()
   lastname: string;
 
+  @Column({ nullable: true })
+  password: string;
+
   @Column({ unique: true })
   email: string;
 
@@ -28,5 +31,5 @@ export class User {
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  updateAt: Date;
+  updatedAt: Date;
 }

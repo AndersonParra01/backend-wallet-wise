@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -12,21 +11,48 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ResponseService } from '@shared/service/response.service';
 import { ResponseDto } from '@shared/dto/response.dto';
-
+import { UserResponseDto } from './dto/user-response.dto';
+import { HashPasswordService } from '@shared/service/hash-password.service';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @Inject(forwardRef(() => ResponseService))
     private readonly response: ResponseService,
+
+    @Inject(forwardRef(() => HashPasswordService))
+    private readonly hashPasswordService: HashPasswordService,
   ) {}
-  async create(createUserDto: CreateUserDto): Promise<ResponseDto<User>> {
+
+  private mapToUserResponse(user: User): UserResponseDto {
+    return {
+      id: user.id,
+      name: user.name,
+      lastname: user.lastname,
+      email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+  async create(
+    createUserDto: CreateUserDto,
+  ): Promise<ResponseDto<UserResponseDto>> {
     try {
       console.log('SERVICE', createUserDto);
-      const newUser = await this.userRepository.save(createUserDto);
+      const hash = await this.hashPasswordService.hashPassword(
+        createUserDto.password,
+      );
+
+      const createDataUser = this.userRepository.create({
+        ...createUserDto,
+        password: hash,
+      });
+      console.log(createDataUser);
+      const newUser = await this.userRepository.save(createDataUser);
+
       console.log('CREADO POST', createUserDto);
 
-      return this.response.handlerSuccess(newUser);
+      return this.response.handlerSuccess(this.mapToUserResponse(newUser));
     } catch (error) {
       console.log(error);
       this.response.handlerError(error);
@@ -55,38 +81,41 @@ export class UsersService {
     }
   }
 
-  async update(
-    id: number,
-    updateUserDto: UpdateUserDto,
-  ): Promise<ResponseDto<UpdateUserDto>> {
+  async update(id: number, updateUserDto: UpdateUserDto) {
     try {
       const userById = await this.findOne(id);
       if (!userById) {
         throw new NotFoundException(`User with id ${id} not found`);
       }
-      const userUpdate: any = await this.userRepository.update(
-        userById,
-        updateUserDto,
-      );
-      return this.response.handlerSuccess(userUpdate);
+
+      const updateUser = this.userRepository.merge(userById, updateUserDto);
+      console.log('UPDATE', updateUser);
+      return await this.userRepository.save(updateUser);
+      /*  return this.response.handlerSuccess(userUpdate); */
     } catch (error) {
       this.response.handlerError(error);
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    try {
+      const userFindById = await this.findOne(id);
+      if (!userFindById) {
+        throw new NotFoundException(`User with id ${id} not found`);
+      }
+      return await this.userRepository.delete(id);
+    } catch (error) {
+      this.response.handlerError(error);
+    }
   }
 
-  async getUserByEmailAndPassword(email: string, password: string) {
+  async getUserByEmail(email: string) {
     try {
       const user = await this.userRepository.findOne({ where: { email } });
       if (!user) {
-        throw new NotFoundException('User not found');
+        throw new NotFoundException('User not found by email ' + email);
       }
-      /* if (!(await user.comparePassword(password))) {
-        throw new BadRequestException('Invalid password');
-      } */
+
       return user;
     } catch (error) {
       this.response.handlerError(error);

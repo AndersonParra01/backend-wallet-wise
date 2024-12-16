@@ -9,13 +9,14 @@ export class ResponseService {
     return ResponseDto.success<T>(200, 'OK', message, data);
   }
 
-  handlerError<T>(error: any): never {
+  handlerError(error: any): never {
     console.error('handler error', {
       Message: error.message,
       Code: error.code,
       Detail: error.detail,
       Constraint: error.constraint,
     });
+    console.log(error);
 
     let code: number;
     let message: string;
@@ -54,7 +55,7 @@ export class ResponseService {
 
     // Lanzar la excepción correctamente
     throw new HttpException(
-      { code: code, message, detail: detail || null },
+      { code: code, message, detail: detail || null || error.error },
       code,
     );
   }
