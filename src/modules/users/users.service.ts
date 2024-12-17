@@ -5,7 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@models/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +12,7 @@ import { ResponseService } from '@shared/service/response.service';
 import { ResponseDto } from '@shared/dto/response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { HashPasswordService } from '@shared/service/hash-password.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class UsersService {
   constructor(
@@ -59,39 +59,44 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<ResponseDto<UserResponseDto[]>> {
     try {
       const users = await this.userRepository.find();
-      return users;
+      const usersResponse = users.map((user) => this.mapToUserResponse(user));
+      return this.response.handlerSuccess(usersResponse);
     } catch (error) {
       this.response.handlerError(error);
     }
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOne(id: number): Promise<ResponseDto<UserResponseDto>> {
     try {
       const user = await this.userRepository.findOne({ where: { id } });
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found`);
       }
-      return user;
+      return this.response.handlerSuccess(this.mapToUserResponse(user));
     } catch (error) {
       // Manejo de errores inesperados
       this.response.handlerError(error);
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<ResponseDto<UserResponseDto>> {
     try {
       const userById = await this.findOne(id);
       if (!userById) {
         throw new NotFoundException(`User with id ${id} not found`);
       }
+      const updateUser = Object.assign(userById.data, updateUserDto);
 
-      const updateUser = this.userRepository.merge(userById, updateUserDto);
-      console.log('UPDATE', updateUser);
-      return await this.userRepository.save(updateUser);
-      /*  return this.response.handlerSuccess(userUpdate); */
+      const saveNewUser = await this.userRepository.save(updateUser);
+      const updatedUserResponse = this.mapToUserResponse(saveNewUser);
+
+      return this.response.handlerSuccess(updatedUserResponse);
     } catch (error) {
       this.response.handlerError(error);
     }
@@ -115,7 +120,6 @@ export class UsersService {
       if (!user) {
         throw new NotFoundException('User not found by email ' + email);
       }
-
       return user;
     } catch (error) {
       this.response.handlerError(error);

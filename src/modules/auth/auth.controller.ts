@@ -3,21 +3,23 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
   Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { UsersService } from '../users/users.service';
+import { TokenDto } from './dto/token.dto';
 
 @Controller('auth/')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private userService: UsersService,
+  ) {}
 
   @Post('login')
   login(@Body() login: LoginDto) {
@@ -27,8 +29,12 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req: any) {
-    console.log('REQUE', req.user);
-    return req.user;
+    return this.userService.findOne(req.user.userId);
+  }
+
+  @Post('refreshToken')
+  refreshToken(@Body('refresh_token') refreshToken: string): Promise<TokenDto> {
+    return this.authService.refreshAccessToken(refreshToken);
   }
 
   @Get()

@@ -1,3 +1,4 @@
+import { ResponseDto } from '@shared/dto/response.dto';
 import {
   Controller,
   Get,
@@ -10,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from '@models/user.entity';
 
 @Controller('users/')
 export class UsersController {
@@ -23,18 +24,20 @@ export class UsersController {
   }
 
   @Get('all')
-  findAll() {
+  findAll(): Promise<ResponseDto<UserResponseDto[]>> {
     return this.usersService.findAll();
   }
 
   @Get('get/:id')
-  async findOne(@Param('id') id: number): Promise<User> {
+  async findOne(
+    @Param('id') id: number,
+  ): Promise<ResponseDto<UserResponseDto>> {
     return this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete('delete/:id')
